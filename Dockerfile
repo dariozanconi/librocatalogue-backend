@@ -3,7 +3,8 @@ FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN apt-get update && apt-get install -y maven \
+    && mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
