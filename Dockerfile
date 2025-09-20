@@ -1,11 +1,11 @@
 # Verwende ein offizielles Java 17 Image (passt zu Spring Boot 3)
 FROM eclipse-temurin:21-jdk
-
-# Setze das Arbeitsverzeichnis
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Kopiere dein Jar in das Image
+FROM eclipse-temurin:21-jdk
+WORKDIR /app
 COPY target/LibroCatalogueApplication.jar app.jar
-
-# Startkommando
 ENTRYPOINT ["java", "-Xmx128m","-Xss512k", "-jar", "app.jar"]
