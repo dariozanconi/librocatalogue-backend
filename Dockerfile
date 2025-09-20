@@ -1,5 +1,5 @@
 # Verwende ein offizielles Java 17 Image (passt zu Spring Boot 3)
-FROM maven:3.9.0-eclipse-temurin-21 AS build
+FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
