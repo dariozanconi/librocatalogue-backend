@@ -10,4 +10,11 @@ import java.util.Optional;
 public interface CollectionRepo extends JpaRepository<Collection, Integer> {
 
     Optional<Collection> findByName(String name);
+
+    @Query("SELECT c FROM Collection c JOIN c.books b WHERE b.id = :bookId")
+    List<Collection> findCollectionsByBookId(@Param("bookId") int id);
+
+    @Query("SELECT DISTINCT c from Collection c " +
+            "WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Collection> searchCollections(String keyword);
 }
