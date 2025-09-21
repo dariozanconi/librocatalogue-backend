@@ -72,4 +72,12 @@ public class CollectionService {
 
         collectionRepo.delete(collection);
     }
+
+    public List<Collection> findCollectionsByBookId(int id) {
+        return collectionRepo.findCollectionsByBookId(id);
+    }
+
+    public List<Collection> searchCollections(String keyword) {
+        return collectionRepo.searchCollections(keyword);
+    }
 }
