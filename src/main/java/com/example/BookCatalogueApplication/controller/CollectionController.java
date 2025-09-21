@@ -73,4 +73,19 @@ public class CollectionController {
         }
     }
 
+    @GetMapping("/book/{id}/collections")
+    public ResponseEntity<List<Collection>> getCollectionsByBookId(@PathVariable int id) {
+        List<Collection> collections = service.findCollectionsByBookId(id);
+        if (collections.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(collections, HttpStatus.OK);
+    }
+
+    @GetMapping("/collections/search")
+    public ResponseEntity<List<Collection>> searchCollectionByName(@RequestParam String keyword) {
+        List<Collection> collections = service.searchCollections(keyword);
+        return new ResponseEntity<>(collections, HttpStatus.OK);
+    }
+
 }
