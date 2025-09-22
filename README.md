@@ -19,6 +19,7 @@ This is the backend service for **LibroCatalogue**, a full-stack application to 
 ## Setup
 Edit src/main/resources/application.properties:
 
+```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/libro_catalogue
 spring.datasource.username=YOUR_USER
 spring.datasource.password=YOUR_PASS
