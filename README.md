@@ -22,11 +22,14 @@ Edit src/main/resources/application.properties:
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/libro_catalogue
 spring.datasource.username=YOUR_USER
-spring.datasource.password=YOUR_PASS
-jwt.secret=YOUR_SECRET
+spring.datasource.password=YOUR_PASSWORD
+
 cloudinary.cloud_name=...
 cloudinary.api_key=...
-cloudinary.api_secret=... 
+cloudinary.api_secret=...
+
+#to register a new user, set a registration code
+app.registration.secret=...
 ```
 ### Prerequisites
 - Java 21+
