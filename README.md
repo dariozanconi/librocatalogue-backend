@@ -8,7 +8,6 @@ This is the backend service for **LibroCatalogue**, a full-stack application to 
 - MySQL
 - JWT Authentication
 - Cloudinary (for cover upload)
-- Open Library / Google Books API (for book metadata)
 
 ## Project Structure
 - `controller/` → REST endpoints
@@ -20,7 +19,7 @@ This is the backend service for **LibroCatalogue**, a full-stack application to 
 Edit src/main/resources/application.properties:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/libro_catalogue
+spring.datasource.url=jdbc:mysql://localhost:3306/librocatalogue
 spring.datasource.username=YOUR_USER
 spring.datasource.password=YOUR_PASSWORD
 
@@ -28,7 +27,7 @@ cloudinary.cloud_name=...
 cloudinary.api_key=...
 cloudinary.api_secret=...
 
-#to register a new user, set a registration code
+#to register a new user when running the application, set a registration code
 app.registration.secret=...
 ```
 ### Prerequisites
@@ -39,4 +38,5 @@ app.registration.secret=...
 ### Database
 ```sql
 CREATE DATABASE libro_catalogue;
+
 
