@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +61,9 @@ public class BookService {
 
         book.setImageName(uploadResult.get("public_id").toString());
         book.setImageUrl(uploadResult.get("secure_url").toString());
-        
+
+        if (book.getAuthor() != null) book.setAuthorSort(toSortableAuthor(book.getAuthor()));
+
         if (book.getTags()!=null) {
             Set<Tag> tagSet = book.getTags().stream()
                     .map(tag -> tagRepo.findByName(tag.getName())
@@ -92,6 +95,7 @@ public class BookService {
 
         existingBook.setTitle(updatedBook.getTitle());
         existingBook.setAuthor(updatedBook.getAuthor());
+        if (updatedBook.getAuthor() != null) existingBook.setAuthorSort(toSortableAuthor(updatedBook.getAuthor()));
         existingBook.setIsbn(updatedBook.getIsbn());
         existingBook.setPublisher(updatedBook.getPublisher());
         existingBook.setPages(updatedBook.getPages());
@@ -132,5 +136,13 @@ public class BookService {
         return repo.searchBooks(keyword,pageable);
     }
 
-
+    private String toSortableAuthor(String author) {
+        String[] parts = author.split(" ");
+        if (parts.length > 1) {
+            String lastName = parts[parts.length - 1];
+            String firstNames = String.join(" ", Arrays.copyOf(parts, parts.length - 1));
+            return lastName + ", " + firstNames;
+        }
+        return author;
+    }
 }

@@ -24,6 +24,7 @@ public class Book {
     private String isbn;
     private String title;
     private String author;
+    private String authorSort;
     private boolean available;
 
     private LocalDate publishDate;
