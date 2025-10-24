@@ -38,6 +38,18 @@ public class CollectionService {
         else return collectionRepo.save(collection);
     }
 
+    public Collection updateCollection(int id, String name) {
+        Collection existingCollection = collectionRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Collection not found with id " + id));
+
+        if (name!=null) {
+            existingCollection.setName(name);
+        } else {
+            throw new IllegalArgumentException("Name should not be null");
+        }
+        return collectionRepo.save(existingCollection);
+    }
+
     public Book addBook(Book book, int id) {
         Collection collection = collectionRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Collection not found"));
@@ -80,4 +92,5 @@ public class CollectionService {
     public List<Collection> searchCollections(String keyword) {
         return collectionRepo.searchCollections(keyword);
     }
+
 }

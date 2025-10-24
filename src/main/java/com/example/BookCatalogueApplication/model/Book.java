@@ -34,6 +34,7 @@ public class Book {
 
     private String imageName;
     private String imageUrl;
+    private String description;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinTable(
@@ -42,5 +43,7 @@ public class Book {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags = new HashSet<>();
+
+    private LocalDate creationDate;
 }
 

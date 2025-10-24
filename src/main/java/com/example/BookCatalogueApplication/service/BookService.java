@@ -2,9 +2,8 @@ package com.example.BookCatalogueApplication.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.example.BookCatalogueApplication.model.Book;
+import com.example.BookCatalogueApplication.model.*;
 import com.example.BookCatalogueApplication.model.Collection;
-import com.example.BookCatalogueApplication.model.Tag;
 import com.example.BookCatalogueApplication.repository.BookRepo;
 import com.example.BookCatalogueApplication.repository.CollectionRepo;
 import com.example.BookCatalogueApplication.repository.TagRepo;
@@ -17,10 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,6 +60,7 @@ public class BookService {
         book.setImageUrl(uploadResult.get("secure_url").toString());
 
         if (book.getAuthor() != null) book.setAuthorSort(toSortableAuthor(book.getAuthor()));
+        book.setCreationDate(LocalDate.now());
 
         if (book.getTags()!=null) {
             Set<Tag> tagSet = book.getTags().stream()
@@ -102,6 +100,9 @@ public class BookService {
         existingBook.setAvailable(updatedBook.isAvailable());
         existingBook.setPublishDate(updatedBook.getPublishDate());
         existingBook.setPublishPlace(updatedBook.getPublishPlace());
+        existingBook.setCreationDate(LocalDate.now());
+
+        existingBook.setDescription(updatedBook.getDescription());
 
         Set<Tag> tagSet = updatedBook.getTags().stream()
                 .map(tag -> tagRepo.findByName(tag.getName())
@@ -144,5 +145,44 @@ public class BookService {
             return lastName + ", " + firstNames;
         }
         return author;
+    }
+
+    public BookPublicDto mapToPublicDto(Book book) {
+        return new BookPublicDto(
+                book.getId(),
+                book.getIsbn(),
+                book.getTitle(),
+                book.getAuthor(),
+                book.getAuthorSort(),
+                book.isAvailable(),
+                book.getPublishDate() != null ? book.getPublishDate() : LocalDate.MIN,
+                book.getPublishPlace(),
+                book.getPublisher(),
+                book.getPages(),
+                book.getImageName(),
+                book.getImageUrl(),
+                Optional.ofNullable(book.getTags()).orElse(Set.of()),
+                book.getCreationDate()
+        );
+    }
+
+    public BookPrivateDto mapToPrivateDto(Book book) {
+        return new BookPrivateDto(
+                book.getId(),
+                book.getIsbn(),
+                book.getTitle(),
+                book.getAuthor(),
+                book.getAuthorSort(),
+                book.isAvailable(),
+                book.getPublishDate() != null ? book.getPublishDate() : LocalDate.MIN,
+                book.getPublishPlace(),
+                book.getPublisher(),
+                book.getPages(),
+                book.getImageName(),
+                book.getImageUrl(),
+                book.getDescription(),
+                Optional.ofNullable(book.getTags()).orElse(Set.of()),
+                book.getCreationDate()
+        );
     }
 }

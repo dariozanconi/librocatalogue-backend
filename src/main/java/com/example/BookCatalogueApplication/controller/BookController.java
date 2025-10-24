@@ -1,6 +1,8 @@
 package com.example.BookCatalogueApplication.controller;
 
 import com.example.BookCatalogueApplication.model.Book;
+import com.example.BookCatalogueApplication.model.BookPrivateDto;
+import com.example.BookCatalogueApplication.model.BookPublicDto;
 import com.example.BookCatalogueApplication.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -21,26 +24,44 @@ public class BookController {
     BookService service;
 
     @GetMapping("/books")
-    public ResponseEntity<Page<Book>> getBooks(
+    public ResponseEntity<Page<?>> getBooks(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "title") String sortBy) {
-        return new ResponseEntity<>(service.getBooks(page, size, sortBy), HttpStatus.OK);
+            @RequestParam(defaultValue = "title") String sortBy,
+            Principal principal) {
+
+        Page<Book> books = service.getBooks(page, size, sortBy);
+
+        if (principal != null) {
+            Page<BookPrivateDto> dtoPage = books.map(service::mapToPrivateDto);
+            return ResponseEntity.ok(dtoPage);
+        } else {
+            Page<BookPublicDto> dtoPage = books.map(service::mapToPublicDto);
+            return ResponseEntity.ok(dtoPage);
+        }
     }
 
     @GetMapping("/books/id/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable int id) {
+    public ResponseEntity<?> getBookById(@PathVariable int id, Principal principal) {
         Book book = service.getBookById(id);
         if (book!=null) {
-            return new ResponseEntity<>(service.getBookById(id), HttpStatus.OK);
+            if (principal != null) {
+                return ResponseEntity.ok(service.mapToPrivateDto(book));
+            } else {
+                return ResponseEntity.ok(service.mapToPublicDto(book));
+            }
         } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/books/isbn/{isbn}")
-    public ResponseEntity<Book> getBookByIsbn(@PathVariable String isbn) {
+    public ResponseEntity<?> getBookByIsbn(@PathVariable String isbn, Principal principal) {
         Book book = service.getBookByIsbn(isbn);
         if (book!=null) {
-            return new ResponseEntity<>(service.getBookByIsbn(isbn), HttpStatus.OK);
+            if (principal != null) {
+                return ResponseEntity.ok(service.mapToPrivateDto(book));
+            } else {
+                return ResponseEntity.ok(service.mapToPublicDto(book));
+            }
         } else return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
@@ -84,11 +105,18 @@ public class BookController {
     }
 
     @GetMapping("/books/search")
-    public ResponseEntity<Page<Book>> searchBooksBKey(@RequestParam String keyword,
+    public ResponseEntity<Page<?>> searchBooksBKey(@RequestParam String keyword,
                                                       @RequestParam(defaultValue = "0") int page,
-                                                      @RequestParam(defaultValue = "20") int size) {
+                                                      @RequestParam(defaultValue = "20") int size,
+                                                      Principal principal) {
         Page<Book> books = service.searchBooks(keyword, page, size);
-        return new ResponseEntity<>(books, HttpStatus.OK);
+        if (principal != null) {
+            Page<BookPrivateDto> dtoPage = books.map(service::mapToPrivateDto);
+            return ResponseEntity.ok(dtoPage);
+        } else {
+            Page<BookPublicDto> dtoPage = books.map(service::mapToPublicDto);
+            return ResponseEntity.ok(dtoPage);
+        }
     }
 
 

@@ -1,7 +1,10 @@
 package com.example.BookCatalogueApplication.controller;
 
 import com.example.BookCatalogueApplication.model.Book;
+import com.example.BookCatalogueApplication.model.BookPrivateDto;
+import com.example.BookCatalogueApplication.model.BookPublicDto;
 import com.example.BookCatalogueApplication.model.Collection;
+import com.example.BookCatalogueApplication.service.BookService;
 import com.example.BookCatalogueApplication.service.CollectionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,17 +23,29 @@ public class CollectionController {
     @Autowired
     CollectionService service;
 
+    @Autowired
+    BookService bookService;
+
     @GetMapping("/collections")
     public ResponseEntity<List<Collection>> getAllCollections() {
         return new ResponseEntity<>(service.getAllCollection(), HttpStatus.OK);
     }
 
     @GetMapping("/collections/{id}/books")
-    public ResponseEntity<Page<Book>> getCollectionBooks(@PathVariable int id,
+    public ResponseEntity<Page<?>> getCollectionBooks(@PathVariable int id,
                                                          @RequestParam(defaultValue = "0") int page,
-                                                         @RequestParam(defaultValue = "20") int size) {
+                                                         @RequestParam(defaultValue = "20") int size,
+                                                         Principal principal) {
+
         Page<Book> books = service.getCollectionBooks(id, page, size);
-        return new ResponseEntity<>(books, HttpStatus.OK);
+
+        if (principal != null) {
+            Page<BookPrivateDto> dtoPage = books.map(bookService::mapToPrivateDto);
+            return ResponseEntity.ok(dtoPage);
+        } else {
+            Page<BookPublicDto> dtoPage = books.map(bookService::mapToPublicDto);
+            return ResponseEntity.ok(dtoPage);
+        }
     }
 
     @PostMapping("/collections")
@@ -61,6 +77,17 @@ public class CollectionController {
             return new ResponseEntity<>("Book removed successfully", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    @PutMapping("/collections/id/{id}")
+    public ResponseEntity<String> updateCollection(@PathVariable int id, @RequestBody String name) {
+        try {
+            Collection updatedCollection = service.updateCollection(id, name);
+            return new ResponseEntity<String>("Collection Updated", HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
