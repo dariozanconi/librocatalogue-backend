@@ -18,5 +18,6 @@ public record BookPrivateDto(
         String imageUrl,
         String description, //get the description if authenticated
         Set<Tag> tags,
-        LocalDate creationDate
+        LocalDate creationDate,
+        LocalDate lendDate
 ) {}

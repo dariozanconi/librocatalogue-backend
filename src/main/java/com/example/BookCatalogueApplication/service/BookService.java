@@ -6,6 +6,7 @@ import com.example.BookCatalogueApplication.model.*;
 import com.example.BookCatalogueApplication.model.Collection;
 import com.example.BookCatalogueApplication.repository.BookRepo;
 import com.example.BookCatalogueApplication.repository.CollectionRepo;
+import com.example.BookCatalogueApplication.repository.PatronRepo;
 import com.example.BookCatalogueApplication.repository.TagRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,9 @@ public class BookService {
     @Autowired
     Cloudinary cloudinary;
 
+    @Autowired
+    PatronRepo patronRepo;
+
     public Page<Book> getBooks(int page, int size, String sortBy) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy).ascending());
         return repo.findAll(pageable);
@@ -49,8 +53,6 @@ public class BookService {
     }
 
     public Book addBook(Book book, MultipartFile image) throws IOException {
-        if (repo.findByIsbn(book.getIsbn()).isPresent())
-            throw new IllegalArgumentException("Book with this isbn already exists");
 
         Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.asMap(
                 "folder", "bookcovers"
@@ -137,6 +139,66 @@ public class BookService {
         return repo.searchBooks(keyword,pageable);
     }
 
+    public Patron lendBookToPatron(int bookId, LendDto lendDto) {
+        Book book = repo.findById(bookId)
+                .orElseThrow(() -> new IllegalArgumentException("Book not found"));
+
+        if (!book.isAvailable()) {
+            throw new IllegalStateException("Book is already lent out.");
+        }
+
+        Patron patron = patronRepo.findByEmail(lendDto.getPatron().getEmail())
+                .orElseGet(() -> {
+                    Patron newPatron = lendDto.getPatron();
+                    newPatron.setCreationDate(LocalDate.now());
+                    book.setAvailable(false);
+                    book.setDescription(lendDto.getDescription());
+                    book.setLendDate(LocalDate.now());
+                    System.out.println(book.getLendDate());
+                    repo.save(book);
+                    if (newPatron.getBooks() == null) {
+                        newPatron.setBooks(new HashSet<>());
+                    }
+                    newPatron.getBooks().add(book);
+                    return patronRepo.save(newPatron);
+                });
+
+        book.setAvailable(false);
+        book.setDescription(lendDto.getDescription());
+        book.setLendDate(LocalDate.now());
+        System.out.println(book.getLendDate());
+        repo.save(book);
+        if (patron.getBooks() == null) {
+            patron.setBooks(new HashSet<>());
+        }
+        patron.getBooks().add(book);
+        patronRepo.save(patron);
+
+        return patron;
+    }
+
+    public void returnBook(int bookId) {
+        Book book = repo.findById(bookId)
+                .orElseThrow(() -> new IllegalArgumentException("Book not found"));
+
+        Patron patron = patronRepo.findPatronByBookId(bookId);
+        if (patron == null) {
+            throw new IllegalStateException("This book is not lent out.");
+        }
+
+        patron.getBooks().remove(book);
+        patronRepo.save(patron);
+
+        book.setAvailable(true);
+        book.setDescription(null);
+        book.setLendDate(null);
+        repo.save(book);
+
+        if (patron.getBooks().isEmpty()) {
+            patronRepo.delete(patron);
+        }
+    }
+
     private String toSortableAuthor(String author) {
         String[] parts = author.split(" ");
         if (parts.length > 1) {
@@ -155,7 +217,7 @@ public class BookService {
                 book.getAuthor(),
                 book.getAuthorSort(),
                 book.isAvailable(),
-                book.getPublishDate() != null ? book.getPublishDate() : LocalDate.MIN,
+                book.getPublishDate(),
                 book.getPublishPlace(),
                 book.getPublisher(),
                 book.getPages(),
@@ -174,7 +236,7 @@ public class BookService {
                 book.getAuthor(),
                 book.getAuthorSort(),
                 book.isAvailable(),
-                book.getPublishDate() != null ? book.getPublishDate() : LocalDate.MIN,
+                book.getPublishDate(),
                 book.getPublishPlace(),
                 book.getPublisher(),
                 book.getPages(),
@@ -182,7 +244,8 @@ public class BookService {
                 book.getImageUrl(),
                 book.getDescription(),
                 Optional.ofNullable(book.getTags()).orElse(Set.of()),
-                book.getCreationDate()
+                book.getCreationDate(),
+                book.getLendDate()
         );
     }
 }

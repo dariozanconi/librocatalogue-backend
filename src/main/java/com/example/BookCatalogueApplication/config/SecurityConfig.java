@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .csrf(customizer -> customizer.disable())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/login", "/api/register").permitAll()
+                        .requestMatchers( "/api/book/{id}/patron", "/api/patrons/**", "/api/patron/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/books/**", "/api/collections/**").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/books/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/books/**", "/api/collections/**").authenticated()

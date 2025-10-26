@@ -49,6 +49,7 @@ public class BookServiceTest {
                 " ",
                 "Book owned by Dario",
                 null,
+                LocalDate.now(),
                 LocalDate.now()
         );
         when(bookRepo.findById(1)).thenReturn(Optional.of(mockBook));
@@ -88,6 +89,7 @@ public class BookServiceTest {
                 " ",
                 "Book owned by Dario",
                 null,
+                LocalDate.now(),
                 LocalDate.now()
         );
         when(bookRepo.findByIsbn("1234567890")).thenReturn(Optional.of(mockBook));
@@ -127,6 +129,7 @@ public class BookServiceTest {
                 " ",
                 "Book owned by Dario",
                 null,
+                LocalDate.now(),
                 LocalDate.now()
         );
         mockBook.setTags(Set.of(new Tag(1L, "Fantasy")));
@@ -173,6 +176,7 @@ public class BookServiceTest {
                 " ",
                 "Book owned by Dario",
                 null,
+                LocalDate.now(),
                 LocalDate.now()
         );
         mockBook.setTags(Set.of(new Tag(1L, "Fantasy")));
@@ -199,6 +203,7 @@ public class BookServiceTest {
                 "https://cloudinary/cover123",
                 "Book owned by Dario",
                 null,
+                LocalDate.now(),
                 LocalDate.now()
         );
         mockExistingBook.setTags(Set.of(new Tag(1L, "Fantasy")));
@@ -217,6 +222,7 @@ public class BookServiceTest {
                 " ",
                 "Book owned by Dario",
                 null,
+                LocalDate.now(),
                 LocalDate.now()
         );
         mockBookUpdate.setTags(Set.of(new Tag(1L, "Classic")));

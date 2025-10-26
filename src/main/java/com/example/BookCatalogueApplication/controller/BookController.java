@@ -1,8 +1,6 @@
 package com.example.BookCatalogueApplication.controller;
 
-import com.example.BookCatalogueApplication.model.Book;
-import com.example.BookCatalogueApplication.model.BookPrivateDto;
-import com.example.BookCatalogueApplication.model.BookPublicDto;
+import com.example.BookCatalogueApplication.model.*;
 import com.example.BookCatalogueApplication.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
@@ -119,5 +117,27 @@ public class BookController {
         }
     }
 
+    @PostMapping("/books/{bookId}/lend")
+    public ResponseEntity<?> lendBookToPatron(@PathVariable int bookId,
+                                              @RequestBody LendDto lendDto) {
+        try {
+            Patron saved = service.lendBookToPatron(bookId, lendDto);
+            return ResponseEntity.ok(saved);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/books/{bookId}/return")
+    public ResponseEntity<String> returnBook(@PathVariable int bookId) {
+        try {
+            service.returnBook(bookId);
+            return ResponseEntity.ok("Book returned successfully.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 
 }

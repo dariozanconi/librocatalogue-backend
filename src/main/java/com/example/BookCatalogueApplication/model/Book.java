@@ -1,6 +1,8 @@
 package com.example.BookCatalogueApplication.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,6 +36,8 @@ public class Book {
 
     private String imageName;
     private String imageUrl;
+
+    @Column(name = "description", length = 1000)
     private String description;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE }, fetch = FetchType.LAZY)
@@ -44,6 +48,7 @@ public class Book {
     )
     private Set<Tag> tags = new HashSet<>();
 
+    private LocalDate lendDate;
     private LocalDate creationDate;
 }
 
